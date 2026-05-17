@@ -1,45 +1,58 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+import sys
+import os
 import joblib
 import json
 import numpy as np
 import pandas as pd
-import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from src.model_generator import generate_and_export_model
 
 # --- Configuration ---
-MODEL_DIR = 'model_output'
+MODEL_DIR = 'results'
 REQUIRED_FIELDS = ("pclass", "sex", "age", "fare", "familySize", "embarked", "title")
 EMBARKED_MAP = {'S': 2, 'C': 0, 'Q': 1}
 
-# --- App Initialization ---
-app = Flask(__name__, static_folder='.', static_url_path='')
+# --- Global Variables for API ---
+app = Flask(__name__)
 CORS(app)
+model = None
+metadata = None
+scaler = None
+TITLE_FALLBACK = 1
 
-# --- Model & Metadata Loading ---
-model = joblib.load(os.path.join(MODEL_DIR, 'titanic_model.pkl'))
-with open(os.path.join(MODEL_DIR, 'model_metadata.json'), 'r') as f:
-    metadata = json.load(f)
+def load_model_and_metadata():
+    """Load model, metadata and scaler from the results directory."""
+    global model, metadata, scaler, TITLE_FALLBACK
+    
+    if not os.path.exists(os.path.join(MODEL_DIR, 'titanic_model.pkl')):
+        print(f" Model not found in '{MODEL_DIR}'. Please train the model first.")
+        return False
+        
+    try:
+        model = joblib.load(os.path.join(MODEL_DIR, 'titanic_model.pkl'))
+        with open(os.path.join(MODEL_DIR, 'model_metadata.json'), 'r') as f:
+            metadata = json.load(f)
 
-TITLE_FALLBACK = metadata['encodings']['title'].get('Mr', 1)
-scaler = joblib.load(os.path.join(MODEL_DIR, 'scaler.pkl')) if metadata.get('uses_scaler') else None
-
-print(f"✅ Loaded model: {metadata['model_name']}")
-print(f"   Accuracy: {metadata['accuracy']*100:.2f}%")
+        TITLE_FALLBACK = metadata['encodings']['title'].get('Mr', 1)
+        
+        if metadata.get('uses_scaler'):
+            scaler = joblib.load(os.path.join(MODEL_DIR, 'scaler.pkl'))
+        else:
+            scaler = None
+            
+        return True
+    except Exception as e:
+        print(f" Error loading model: {e}")
+        return False
 
 # --- Routes ---
-@app.route('/')
-def home():
-    """Serve the main index.html page."""
-    return send_from_directory('.', 'index.html')
-
-@app.route('/assets/<path:path>')
-def send_assets(path):
-    """Serve static assets (CSS, JS, images)."""
-    return send_from_directory('assets', path)
-
 @app.route('/api')
 def api_home():
     """API information endpoint."""
+    if not metadata:
+        return jsonify({'status': 'offline', 'error': 'Model not loaded'})
+        
     return jsonify({
         'status': 'online',
         'model': metadata['model_name'],
@@ -50,6 +63,8 @@ def api_home():
 @app.route('/api/model-info')
 def model_info():
     """Return model metadata."""
+    if not metadata:
+        return jsonify({'error': 'Model not loaded'}), 500
     return jsonify(metadata)
 
 # --- Feature Preparation ---
@@ -102,6 +117,9 @@ def _prepare_features(data: dict) -> pd.DataFrame:
 # --- Prediction Endpoint ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
+    if not model:
+        return jsonify({'error': 'Model not loaded'}), 500
+        
     data = request.get_json(silent=True)
     try:
         X_pred = _prepare_features(data)
@@ -133,18 +151,59 @@ def predict():
     except Exception as exc:
         return jsonify({'error': f'Unexpected error: {exc}'}), 500
 
-# --- Main Entrypoint ---
+# --- CLI Menu ---
+def print_menu():
+    print("\n" + "="*50)
+    print(" TITANIC SURVIVAL PREDICTION - MAIN MENU")
+    print("="*50)
+    print("1. Train Model & Export")
+    print("2. Run API Server")
+    print("3. Run Streamlit Dashboard")
+    print("4. Exit")
+    print("="*50)
+
+def main():
+    while True:
+        print_menu()
+        choice = input("Enter your choice (1-4): ").strip()
+
+        if choice == '1':
+            data_file = input("Enter path to dataset [default: data/titanic_detailed_passengers_data.csv]: ").strip()
+            if not data_file:
+                data_file = 'data/titanic_detailed_passengers_data.csv'
+            
+            try:
+                generate_and_export_model(data_path=data_file, output_dir=MODEL_DIR)
+            except Exception as e:
+                print(f"\n Error during training: {e}")
+                
+        elif choice == '2':
+            if load_model_and_metadata():
+                print("\n" + "="*50)
+                print(" TITANIC SURVIVAL PREDICTION API SERVER")
+                print("="*50)
+                print(f" Model loaded: {metadata['model_name']}")
+                print(f" Model accuracy: {metadata['accuracy']*100:.2f}%")
+                print()
+                print(" Server running at: http://localhost:5000")
+                print(" API endpoint: http://localhost:5000/api/predict")
+                print()
+                print("Press Ctrl+C to stop")
+                print("="*50 + "\n")
+                
+                try:
+                    app.run(debug=False, port=5000, host='0.0.0.0')
+                except KeyboardInterrupt:
+                    print("\nServer stopped.")
+            
+        elif choice == '3':
+            print("Starting Streamlit Dashboard...")
+            os.system("streamlit run src/dashboard.py")
+        elif choice == '4':
+            print("Exiting...")
+            sys.exit(0)
+        else:
+            print("Invalid choice. Please enter 1, 2, 3, or 4.")
+
 if __name__ == '__main__':
-    print("\n" + "="*70)
-    print("🚢 TITANIC SURVIVAL PREDICTION API SERVER")
-    print("="*70)
-    print(f"✅ Model loaded: {metadata['model_name']}")
-    print(f"✅ Model accuracy: {metadata['accuracy']*100:.2f}%")
-    print()
-    print("🌐 Server running at: http://localhost:5000")
-    print("📄 Web interface: http://localhost:5000")
-    print("🔌 API endpoint: http://localhost:5000/api/predict")
-    print()
-    print("Press Ctrl+C to stop")
-    print("="*70 + "\n")
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    main()
