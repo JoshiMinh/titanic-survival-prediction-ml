@@ -5,3 +5,4 @@ flask-cors
 scikit-learn
 joblib
 streamlit
+pytest

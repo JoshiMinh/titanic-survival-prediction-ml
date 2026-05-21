@@ -1,27 +1,9 @@
 import os
 import joblib
 import json
-from src.data_loader import load_data
-from src.feature_engineering import engineer_features
-from src.train import train_models
 
-def generate_and_export_model(data_path='data/titanic_detailed_passengers_data.csv', output_dir='results'):
-    """Generate and export the best machine learning model."""
-    print("=" * 50)
-    print("MODEL GENERATION AND EXPORT")
-    print("=" * 50)
-    
-    print("Loading data...")
-    df = load_data(data_path)
-
-    print("Engineering features...")
-    X, y, feature_cols = engineer_features(df)
-
-    print("Training and evaluating models...")
-    best_model, best_model_name, scaler, accuracy, f1_score = train_models(X, y)
-
-    print(f"\n Best Model: {best_model_name} (Accuracy: {accuracy*100:.2f}%)")
-
+def save_model(best_model, best_model_name, scaler, accuracy, f1_score, feature_cols, output_dir='results'):
+    """Save the model, scaler, and metadata to the output directory."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print(f"Created directory: {output_dir}")

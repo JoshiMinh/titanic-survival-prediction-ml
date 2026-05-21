@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from src.model_generator import generate_and_export_model
+from src.train import generate_and_export_model
 
 # --- Configuration ---
 MODEL_DIR = 'results'
@@ -168,9 +168,9 @@ def main():
         choice = input("Enter your choice (1-4): ").strip()
 
         if choice == '1':
-            data_file = input("Enter path to dataset [default: data/titanic_detailed_passengers_data.csv]: ").strip()
+            data_file = input("Enter path to dataset [default: data/titanic_passengers_data.csv]: ").strip()
             if not data_file:
-                data_file = 'data/titanic_detailed_passengers_data.csv'
+                data_file = 'data/titanic_passengers_data.csv'
             
             try:
                 generate_and_export_model(data_path=data_file, output_dir=MODEL_DIR)
@@ -198,7 +198,7 @@ def main():
             
         elif choice == '3':
             print("Starting Streamlit Dashboard...")
-            os.system("streamlit run src/dashboard.py")
+            os.system("streamlit run src/streamlit.py")
         elif choice == '4':
             print("Exiting...")
             sys.exit(0)
