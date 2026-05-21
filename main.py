@@ -2,6 +2,8 @@ import sys
 import os
 from src.pipeline import generate_and_export_model
 
+import subprocess
+
 # --- CLI Menu ---
 def print_menu():
     print("\n" + "="*50)
@@ -13,47 +15,64 @@ def print_menu():
     print("="*50)
 
 def main():
-    while True:
-        print_menu()
-        choice = input("Enter your choice (1-3): ").strip()
+    try:
+        while True:
+            print_menu()
+            choice = input("Enter your choice (1-3): ").strip()
 
-        if choice == '1':
-            data_file = input("Enter path to dataset [default: data/titanic_passengers_data.csv]: ").strip()
-            if not data_file:
-                data_file = 'data/titanic_passengers_data.csv'
-            
-            print("\nWhich model would you like to train?")
-            print("1. All Models")
-            print("2. Logistic Regression")
-            print("3. KNN")
-            print("4. SVM")
-            print("5. Decision Tree")
-            print("6. Random Forest")
-            model_choice = input("Enter your choice (1-6) [default: 1]: ").strip()
-            
-            choice_map = {
-                '1': 'all',
-                '2': 'Logistic Regression',
-                '3': 'KNN',
-                '4': 'SVM',
-                '5': 'Decision Tree',
-                '6': 'Random Forest'
-            }
-            selected_model = choice_map.get(model_choice, 'all')
-            
-            try:
-                generate_and_export_model(data_path=data_file, output_dir='results', model_choice=selected_model)
-            except Exception as e:
-                print(f"\n Error during training: {e}")
+            if choice == '1':
+                data_file = input("Enter path to dataset [default: data/titanic_passengers_data.csv]: ").strip()
+                if not data_file:
+                    data_file = 'data/titanic_passengers_data.csv'
                 
-        elif choice == '2':
-            print("Starting Streamlit Dashboard...")
-            os.system("streamlit run src/streamlit.py")
-        elif choice == '3':
-            print("Exiting...")
-            sys.exit(0)
-        else:
-            print("Invalid choice. Please enter 1, 2, or 3.")
+                print("\nWhich model would you like to train?")
+                print("1. All Models")
+                print("2. Logistic Regression")
+                print("3. KNN")
+                print("4. SVM")
+                print("5. Decision Tree")
+                print("6. Random Forest")
+                model_choice = input("Enter your choice (1-6) [default: 1]: ").strip()
+                
+                choice_map = {
+                    '1': 'all',
+                    '2': 'Logistic Regression',
+                    '3': 'KNN',
+                    '4': 'SVM',
+                    '5': 'Decision Tree',
+                    '6': 'Random Forest'
+                }
+                selected_model = choice_map.get(model_choice, 'all')
+                
+                try:
+                    generate_and_export_model(data_path=data_file, output_dir='results', model_choice=selected_model)
+                except Exception as e:
+                    print(f"\n Error during training: {e}")
+                    
+            elif choice == '2':
+                print("Starting Streamlit Dashboard... (Press Ctrl+C to stop)")
+                # We use an inline script to patch the asyncio Windows bug BEFORE Streamlit initializes Tornado
+                bootstrapper = (
+                    "import sys, asyncio\n"
+                    "if sys.platform == 'win32':\n"
+                    "    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())\n"
+                    "import streamlit.web.cli as stcli\n"
+                    "sys.argv=['streamlit', 'run', 'src/streamlit.py']\n"
+                    "sys.exit(stcli.main())\n"
+                )
+                try:
+                    subprocess.run([sys.executable, "-c", bootstrapper])
+                except KeyboardInterrupt:
+                    pass
+                print("\nStreamlit Dashboard stopped.")
+            elif choice == '3':
+                print("Exiting...")
+                sys.exit(0)
+            else:
+                print("Invalid choice. Please enter 1, 2, or 3.")
+    except KeyboardInterrupt:
+        print("\n\nExiting application cleanly. Goodbye!")
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()
