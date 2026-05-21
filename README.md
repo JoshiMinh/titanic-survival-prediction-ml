@@ -23,23 +23,23 @@ Welcome to the **Titanic Survival Prediction** project! This repository contains
 ### ⚙️ Installation
 
 1. **Clone the repository:**
-   \`\`\`bash
+   ```bash
    git clone https://github.com/yourusername/titanic-survival-prediction-ml.git
    cd titanic-survival-prediction-ml
-   \`\`\`
+   ```
 
 2. **Set up your virtual environment:**
    *(Windows PowerShell)*
-   \`\`\`powershell
+   ```powershell
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
-   \`\`\`
+   ```
 
 3. **Install dependencies:**
-   \`\`\`bash
+   ```bash
    python -m pip install --upgrade pip
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 ---
 
@@ -48,9 +48,9 @@ Welcome to the **Titanic Survival Prediction** project! This repository contains
 You can manage everything from the main CLI menu!
 
 Run the following command to open the interactive menu:
-\`\`\`bash
+```bash
 python main.py
-\`\`\`
+```
 
 **Menu Options:**
 1. **Train Models**: Select and train a specific model (or all of them) on the Titanic dataset.
