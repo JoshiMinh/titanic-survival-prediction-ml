@@ -1,9 +1,15 @@
+import os
+import sys
+
+if sys.platform == 'win32':
+    import asyncio
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 import json
-import os
 
 # --- Configuration ---
 st.set_page_config(

@@ -1,57 +1,66 @@
-# Titanic Survival Prediction
+# 🚢 Titanic Survival Prediction
 
-Small project demonstrating a Titanic survival prediction model with a minimal API and a Jupyter notebook.
+Welcome to the **Titanic Survival Prediction** project! This repository contains a machine learning model that predicts whether a passenger would have survived the Titanic disaster based on their details.
 
-## Summary
+---
 
-- Simple web UI and `prediction_api.py` for making predictions.
-- Jupyter notebook: `Titanic Survival Prediction.ipynb` for exploration and training.
+## 🌟 Features
 
-## Requirements
+- **🧠 Machine Learning Notebook**: A detailed Jupyter notebook (`titanic_survival_prediction_ml.ipynb`) for data exploration, preprocessing, and training various ML models (Logistic Regression, KNN, SVM, Decision Tree, Random Forest).
+- **🎛️ Interactive CLI**: Use `main.py` to easily train new models from the command line and explore the results.
+- **📊 Streamlit Dashboard**: A beautiful, interactive web UI built with Streamlit (`src/streamlit.py`) where you can enter passenger details and predict their survival chances instantly!
 
-- Python 3.8 or newer
-- See `requirements.txt` for Python dependencies
+---
 
-## Setup (create and use a virtual environment)
+## 🚀 Getting Started
 
-Windows (PowerShell):
+### 📋 Prerequisites
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+- Python 3.8+
+- Recommended: A virtual environment (venv or Conda)
 
-Windows (Command Prompt):
+### ⚙️ Installation
 
-```cmd
-python -m venv .venv
-.venv\Scripts\activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+1. **Clone the repository:**
+   \`\`\`bash
+   git clone https://github.com/yourusername/titanic-survival-prediction-ml.git
+   cd titanic-survival-prediction-ml
+   \`\`\`
 
-macOS / Linux (bash/zsh):
+2. **Set up your virtual environment:**
+   *(Windows PowerShell)*
+   \`\`\`powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   \`\`\`
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
+3. **Install dependencies:**
+   \`\`\`bash
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   \`\`\`
 
-## Run
+---
 
-- Start the API server:
+## 🎮 Usage
 
-```bash
-python prediction_api.py
-```
+You can manage everything from the main CLI menu!
 
-- Open the notebook in Jupyter to explore or re-train: `Titanic Survival Prediction.ipynb`
+Run the following command to open the interactive menu:
+\`\`\`bash
+python main.py
+\`\`\`
 
-## Notes
+**Menu Options:**
+1. **Train Models**: Select and train a specific model (or all of them) on the Titanic dataset.
+2. **Run Streamlit Dashboard**: Launches the interactive web app locally. 
+3. **Exit**: Closes the application.
 
-- Use the created `.venv` for reproducible dependency management and to avoid polluting the system Python.
-- If you prefer Conda, create a Conda env and install dependencies from `requirements.txt`.
+*To view the dashboard, simply choose option 2, and it will automatically open in your default web browser.*
+
+---
+
+## 📝 Notes
+- Ensure your dataset is located at `data/titanic_passengers_data.csv` before training.
+- Use the `.venv` to keep your system Python clean and for reproducible dependency management.
+- Trained models and their metadata are saved in the `results/` folder and used by the Streamlit app.
