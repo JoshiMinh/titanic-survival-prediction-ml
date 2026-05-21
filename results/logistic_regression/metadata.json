@@ -1,0 +1,48 @@
+{
+  "model_name": "Logistic Regression",
+  "accuracy": 0.8760330578512396,
+  "f1_score": 0.8514851485148515,
+  "features": [
+    "Pclass",
+    "Sex",
+    "Age",
+    "FarePerPerson_Log",
+    "FamilySize",
+    "Embarked",
+    "Title",
+    "Age_Class"
+  ],
+  "uses_scaler": true,
+  "encodings": {
+    "sex": {
+      "male": 1,
+      "female": 0
+    },
+    "embarked": {
+      "C": 0,
+      "Q": 1,
+      "S": 2
+    },
+    "title": {
+      "Mr": 1,
+      "Mrs": 2,
+      "Miss": 3,
+      "Master": 4,
+      "Dr": 5,
+      "Rev": 6,
+      "Col": 7,
+      "Major": 8
+    },
+    "deck": {
+      "A": 1,
+      "B": 2,
+      "C": 3,
+      "D": 4,
+      "E": 5,
+      "F": 6,
+      "G": 7,
+      "T": 8,
+      "U": 0
+    }
+  }
+}

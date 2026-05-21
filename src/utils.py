@@ -1,30 +1,30 @@
 import os
 import joblib
 import json
+import re
 
-def save_model(best_model, best_model_name, scaler, accuracy, f1_score, feature_cols, output_dir='results'):
+def save_model(model, model_name, scaler, accuracy, f1_score, feature_cols, output_dir='results'):
     """Save the model, scaler, and metadata to the output directory."""
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        print(f"Created directory: {output_dir}")
+    safe_name = re.sub(r'[^a-z0-9]+', '_', model_name.lower()).strip('_')
+    model_dir = os.path.join(output_dir, safe_name)
+    
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
 
     # Save the model
-    model_path = os.path.join(output_dir, 'titanic_model.pkl')
-    joblib.dump(best_model, model_path)
-    print(f" Model saved to {model_path}")
+    model_path = os.path.join(model_dir, 'model.pkl')
+    joblib.dump(model, model_path)
+    print(f" Model {model_name} saved to {model_path}")
 
     # Save the scaler if needed
-    uses_scaler = best_model_name not in ["Decision Tree", "Random Forest"]
+    uses_scaler = model_name not in ["Decision Tree", "Random Forest"]
     if uses_scaler:
-        scaler_path = os.path.join(output_dir, 'scaler.pkl')
+        scaler_path = os.path.join(model_dir, 'scaler.pkl')
         joblib.dump(scaler, scaler_path)
-        print(f" Scaler saved to {scaler_path}")
-    else:
-        print(" No scaler needed for tree-based models")
 
     # Save metadata
     encoding_info = {
-        'model_name': best_model_name,
+        'model_name': model_name,
         'accuracy': float(accuracy),
         'f1_score': float(f1_score),
         'features': feature_cols,
@@ -37,8 +37,7 @@ def save_model(best_model, best_model_name, scaler, accuracy, f1_score, feature_
         }
     }
 
-    metadata_path = os.path.join(output_dir, 'model_metadata.json')
+    metadata_path = os.path.join(model_dir, 'metadata.json')
     with open(metadata_path, 'w', encoding='utf-8') as f:
         json.dump(encoding_info, f, indent=2)
-    print(f" Metadata saved to {metadata_path}")
-    print("\n Model export complete!")
+    print(f" Metadata for {model_name} saved to {metadata_path}")

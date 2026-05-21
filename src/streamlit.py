@@ -17,27 +17,50 @@ MODEL_DIR = 'results'
 REQUIRED_FIELDS = ("pclass", "sex", "age", "fare", "familySize", "embarked", "title")
 EMBARKED_MAP = {'S': 2, 'C': 0, 'Q': 1}
 
-# --- Load Model & Metadata ---
 @st.cache_resource
-def load_model_data():
-    if not os.path.exists(os.path.join(MODEL_DIR, 'titanic_model.pkl')):
-        return None, None, None
-        
+def get_available_models():
+    """Returns a list of model directories and their metadata."""
+    if not os.path.exists(MODEL_DIR):
+        return []
+    
+    models = []
+    for item in os.listdir(MODEL_DIR):
+        item_path = os.path.join(MODEL_DIR, item)
+        if os.path.isdir(item_path):
+            meta_path = os.path.join(item_path, 'metadata.json')
+            if os.path.exists(meta_path):
+                try:
+                    with open(meta_path, 'r') as f:
+                        meta = json.load(f)
+                    models.append({
+                        'dir': item_path,
+                        'name': meta.get('model_name', item),
+                        'accuracy': meta.get('accuracy', 0),
+                        'metadata': meta
+                    })
+                except:
+                    pass
+    # Sort by accuracy descending
+    models.sort(key=lambda x: x['accuracy'], reverse=True)
+    return models
+
+@st.cache_resource
+def load_specific_model(model_dir):
     try:
-        model = joblib.load(os.path.join(MODEL_DIR, 'titanic_model.pkl'))
-        with open(os.path.join(MODEL_DIR, 'model_metadata.json'), 'r') as f:
+        model = joblib.load(os.path.join(model_dir, 'model.pkl'))
+        with open(os.path.join(model_dir, 'metadata.json'), 'r') as f:
             metadata = json.load(f)
             
         scaler = None
         if metadata.get('uses_scaler'):
-            scaler = joblib.load(os.path.join(MODEL_DIR, 'scaler.pkl'))
+            scaler_path = os.path.join(model_dir, 'scaler.pkl')
+            if os.path.exists(scaler_path):
+                scaler = joblib.load(scaler_path)
             
         return model, metadata, scaler
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"Error loading model from {model_dir}: {e}")
         return None, None, None
-
-model, metadata, scaler = load_model_data()
 
 # --- Helper Functions ---
 def prepare_features(pclass, sex, age, fare, family_size, embarked, title, metadata):
@@ -76,8 +99,10 @@ Welcome to the Titanic Survival Prediction System.
 This dashboard uses a Machine Learning model trained on the historical dataset of Titanic passengers to predict your chances of survival based on your profile.
 """)
 
-if not model:
-    st.error("Model not found! Please run the training script first.")
+available_models = get_available_models()
+
+if not available_models:
+    st.error("No models found! Please run the training script first.")
     st.stop()
 
 # Layout
@@ -105,6 +130,15 @@ with col1:
             'Cherbourg (France)', 
             'Queenstown (Ireland)'
         ])
+
+    with st.container():
+        st.subheader("Model Selection")
+        model_options = {f"{m['name']} (Acc: {m['accuracy']*100:.1f}%)": m['dir'] for m in available_models}
+        selected_model_label = st.selectbox("Choose Model", list(model_options.keys()))
+        selected_model_dir = model_options[selected_model_label]
+        
+    # Load selected model dynamically
+    model, metadata, scaler = load_specific_model(selected_model_dir)
 
     predict_btn = st.button("🔮 Predict Fate", type="primary", use_container_width=True)
 
