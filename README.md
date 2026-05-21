@@ -9,6 +9,7 @@ Welcome to the **Titanic Survival Prediction** project! This repository contains
 - **🧠 Machine Learning Notebook**: A detailed Jupyter notebook (`titanic_survival_prediction_ml.ipynb`) for data exploration, preprocessing, and training various ML models (Logistic Regression, KNN, SVM, Decision Tree, Random Forest).
 - **🎛️ Interactive CLI**: Use `main.py` to easily train new models from the command line and explore the results.
 - **📊 Streamlit Dashboard**: A beautiful, interactive web UI built with Streamlit (`src/streamlit.py`) where you can enter passenger details and predict their survival chances instantly!
+- **🤖 Automated Training Pipeline**: A GitHub Action (`.github/workflows/training.yml`) automatically triggers model training and saves the best models back to the `results/` folder upon any data or code updates.
 
 ---
 

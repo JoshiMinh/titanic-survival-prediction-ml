@@ -31,7 +31,7 @@ jobs:
 
       - name: Train All Models
         run: |
-          python -c "from src.train import generate_and_export_model; generate_and_export_model(data_path='data/titanic_passengers_data.csv', output_dir='results', model_choice='all')"
+          python -c "from src.pipeline import generate_and_export_model; generate_and_export_model(data_path='data/titanic_passengers_data.csv', output_dir='results', model_choice='all')"
           
       - name: Commit and Push Results
         run: |

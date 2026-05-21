@@ -1,6 +1,6 @@
 import sys
 import os
-from src.train import generate_and_export_model
+from src.pipeline import generate_and_export_model
 
 # --- CLI Menu ---
 def print_menu():
