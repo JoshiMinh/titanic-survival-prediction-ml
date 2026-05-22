@@ -2,6 +2,8 @@
 
 Welcome to the **Titanic Survival Prediction** project! This repository contains a machine learning model that predicts whether a passenger would have survived the Titanic disaster based on their details.
 
+![Preview](preview.png)
+
 ---
 
 ## 🌟 Features
